@@ -48,8 +48,8 @@ project-root/
 1. Clone the repository:
 
 bash
-git clone https://github.com/your-username/assignment4.git
-cd assignment4
+git clone https://github.com/AAAman333/final_web
+cd web4
 
 npm install
 
