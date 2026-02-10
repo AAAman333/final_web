@@ -49,7 +49,7 @@ project-root/
 
 bash
 git clone https://github.com/AAAman333/final_web
-cd web4
+cd final_web
 
 npm install
 
@@ -57,8 +57,9 @@ Create a .env file with the following variables:
 PORT=3000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
+OPENWEATHER_API=apikey
 
-npm run dev
+npm start
 
 
 ##User Authentication
@@ -86,6 +87,7 @@ npm run dev
 | PUT    | /api/orders/:id | Admin Only | Update order                                 |
 | DELETE | /api/orders/:id | Admin Only | Delete order                                 |
 
+https://everfree.onrender.com
 
 ##Postman Collection
 https://moldir-yergesh-2477478.postman.co/workspace/Moldir-Yergesh's-Workspace~930fcc6a-a8bd-4d7a-8f52-304890952225/collection/50963436-f23201c2-c02f-445d-9387-e1157efac1d8?action=share&source=copy-link&creator=50963436
