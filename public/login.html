@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Everfree – Auth</title>
+  <link rel="icon" type="image/png" href="images/111.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #fff8e7; font-family: 'Playfair Display', serif; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .auth-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(225, 54, 144, 0.1); width: 100%; max-width: 400px; text-align: center; border: 1px solid #fde3ec; }
+    .btn-pink { background-color: #e13690; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 600; }
+    .form-control { border-radius: 10px; margin-bottom: 15px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="auth-card">
+  <img src="images/111.png" alt="Logo" style="height:50px; margin-bottom:20px;">
+  <div id="login-sec">
+    <h2>Welcome Back</h2>
+    <form id="f-login">
+      <input type="email" id="l-email" class="form-control" placeholder="Email" required>
+      <input type="password" id="l-pass" class="form-control" placeholder="Password" required>
+      <button type="submit" class="btn-pink">Login</button>
+    </form>
+    <p class="mt-3">New? <span onclick="toggle()" style="color:#e13690; cursor:pointer">Sign Up</span></p>
+  </div>
+  <div id="reg-sec" class="hidden">
+    <h2>Join Us</h2>
+    <form id="f-reg">
+      <input type="email" id="r-email" class="form-control" placeholder="Email" required>
+      <input type="password" id="r-pass" class="form-control" placeholder="Password" required>
+      <button type="submit" class="btn-pink">Register</button>
+    </form>
+    <p class="mt-3">Have account? <span onclick="toggle()" style="color:#e13690; cursor:pointer">Login</span></p>
+  </div>
+</div>
+<script>
+  function toggle() {
+    document.getElementById('login-sec').classList.toggle('hidden');
+    document.getElementById('reg-sec').classList.toggle('hidden');
+  }
+  document.getElementById('f-reg').onsubmit = async (e) => {
+    e.preventDefault();
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: document.getElementById('r-email').value, password: document.getElementById('r-pass').value, role: 'user' })
+    });
+    if (res.ok) { alert('Success!'); toggle(); }
+  };
+  document.getElementById('f-login').onsubmit = async (e) => {
+    e.preventDefault();
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: document.getElementById('l-email').value, password: document.getElementById('l-pass').value })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      localStorage.setItem('token', d.token);
+      localStorage.setItem('role', d.user.role);
+      window.location.href = d.user.role === 'admin' ? 'admin.html' : 'index2.html';
+    } else alert(d.message);
+  };
+</script>
+</body>
+</html>

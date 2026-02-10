@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Everfree Admin</title>
+  <link rel="icon" type="image/png" href="images/111.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #fff8e7; font-family: 'Playfair Display', serif; }
+    header { background-color: #fde3ec; padding: 15px 0; }
+    .card-custom { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+    .btn-pink { background: #e13690; color: white; border: none; padding: 8px 15px; border-radius: 8px; }
+    .btn-pink:hover { background: #c9247a; color: white; }
+    .section-title { color: #e13690; border-bottom: 2px solid #fde3ec; padding-bottom: 10px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container d-flex justify-content-between align-items-center">
+    <h4 style="color:#e13690; margin:0">Everfree Admin Panel</h4>
+    <div>
+      <a href="index2.html" class="btn btn-sm btn-outline-danger me-2">View Shop</a>
+      <button onclick="logout()" class="btn btn-sm btn-pink">Logout</button>
+    </div>
+  </div>
+</header>
+<div class="container mt-4">
+  <div class="card-custom">
+    <h3 class="section-title">🌸 Manage Flowers</h3>
+    <form id="flower-form">
+      <input type="hidden" id="f-id">
+      <div class="row">
+        <div class="col-md-3 mb-2"><input type="text" id="f-name" class="form-control" placeholder="Name" required></div>
+        <div class="col-md-2 mb-2"><input type="number" id="f-price" class="form-control" placeholder="Price" required></div>
+        <div class="col-md-3 mb-2"><input type="text" id="f-img" class="form-control" placeholder="Image URL"></div>
+        <div class="col-md-2 mb-2">
+          <select id="f-cat" class="form-control">
+            <option value="Bouquet">Bouquet</option>
+            <option value="Box">Box</option>
+            <option value="Single">Single</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-2"><button type="submit" class="btn-pink w-100">Save</button></div>
+      </div>
+      <textarea id="f-desc" class="form-control mt-2" placeholder="Description" required></textarea>
+    </form>
+    <table class="table mt-4">
+      <thead><tr><th>Img</th><th>Name</th><th>Price</th><th>Actions</th></tr></thead>
+      <tbody id="flower-list"></tbody>
+    </table>
+  </div>
+
+  <div class="card-custom">
+    <h3 class="section-title">📦 Customer Orders</h3>
+    <table class="table">
+      <thead><tr><th>Customer</th><th>Phone</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>
+      <tbody id="order-list"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+  if (!token || localStorage.getItem('role') !== 'admin') window.location.href = 'login.html';
+
+  const h = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+  function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+  async function loadFlowers() {
+    const res = await fetch('/api/flowers');
+    const data = await res.json();
+    document.getElementById('flower-list').innerHTML = data.map(f => `
+      <tr>
+        <td><img src="${f.imageUrl}" width="40"></td>
+        <td>${f.name}</td>
+        <td>${f.price} ₸</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editFlower('${f._id}')">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="delFlower('${f._id}')">Del</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadOrders() {
+    const res = await fetch('/api/orders', { headers: h });
+    const data = await res.json();
+    document.getElementById('order-list').innerHTML = data.map(o => `
+      <tr>
+        <td>${o.customerName}</td>
+        <td>${o.phone}</td>
+        <td>
+          <select onchange="updateOrderStatus('${o._id}', this.value)" class="form-control form-control-sm">
+            <option ${o.status==='Pending'?'selected':''}>Pending</option>
+            <option ${o.status==='Completed'?'selected':''}>Completed</option>
+            <option ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+          </select>
+        </td>
+        <td>${o.totalPrice} ₸</td>
+        <td><button class="btn btn-sm btn-danger" onclick="delOrder('${o._id}')">Del</button></td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('flower-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('f-id').value;
+    const body = {
+      name: document.getElementById('f-name').value,
+      price: document.getElementById('f-price').value,
+      imageUrl: document.getElementById('f-img').value || 'images/5.jpg',
+      category: document.getElementById('f-cat').value,
+      description: document.getElementById('f-desc').value
+    };
+    await fetch(id ? `/api/flowers/${id}` : '/api/flowers', {
+      method: id ? 'PUT' : 'POST',
+      headers: h,
+      body: JSON.stringify(body)
+    });
+    e.target.reset(); document.getElementById('f-id').value = '';
+    loadFlowers();
+  };
+
+  async function editFlower(id) {
+    const res = await fetch(`/api/flowers/${id}`);
+    const f = await res.json();
+    document.getElementById('f-id').value = f._id;
+    document.getElementById('f-name').value = f.name;
+    document.getElementById('f-price').value = f.price;
+    document.getElementById('f-img').value = f.imageUrl;
+    document.getElementById('f-cat').value = f.category;
+    document.getElementById('f-desc').value = f.description;
+  }
+
+  async function delFlower(id) { if(confirm('Del?')) { await fetch(`/api/flowers/${id}`, { method: 'DELETE', headers: h }); loadFlowers(); } }
+  async function delOrder(id) { if(confirm('Del?')) { await fetch(`/api/orders/${id}`, { method: 'DELETE', headers: h }); loadOrders(); } }
+  async function updateOrderStatus(id, status) { await fetch(`/api/orders/${id}`, { method: 'PUT', headers: h, body: JSON.stringify({status}) }); }
+
+  loadFlowers();
+  loadOrders();
+</script>
+</body>
+</html>
