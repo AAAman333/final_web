@@ -21,7 +21,8 @@ const orderSchema = new mongoose.Schema({
   items: [String], 
   createdAt: { type: Date, default: Date.now }
 });
-const Order = mongoose.model('Order', orderSchema);
+const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
+
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/flowers', require('./routes/flowerRoutes'));
@@ -89,8 +90,8 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
-app.use((req, res) => {
-  res.status(404).json({ message: `Can't find ${req.originalUrl} on this server!` });
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 mongoose.set('strictQuery', false);
