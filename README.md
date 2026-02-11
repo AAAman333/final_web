@@ -2,6 +2,31 @@
 
 ## Project Overview
 
+Everfree is a Full-Stack Flower Shop application built with Node.js, Express, MongoDB, and JWT authentication.
+The project demonstrates:
+Secure authentication and authorization (JWT + RBAC)
+Full CRUD functionality
+Relational data modeling in MongoDB
+Production-ready backend deployment
+Clean MVC architecture
+RESTful API design
+The system allows users to browse flowers and create orders, while administrators manage products and orders.
+
+## Architecture & Technologies
+
+Backend Stack
+Node.js
+Express.js
+MongoDB Atlas
+JWT (Authentication)
+bcrypt (Password hashing)
+dotenv (Environment variables)
+Architecture Pattern
+The application follows MVC architecture:
+Models – MongoDB schemas
+Controllers – Business logic
+Routes – API endpoints
+Middleware – Authentication & Authorization layer
 
 The project has three main objects:
 
